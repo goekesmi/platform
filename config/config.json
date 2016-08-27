@@ -46,8 +46,8 @@
         "UserStatusAwayTimeout": 300
     },
     "SqlSettings": {
-        "DriverName": "mysql",
-        "DataSource": "mmuser:mostest@tcp(dockerhost:3306)/mattermost_test?charset=utf8mb4,utf8",
+        "DriverName": "postgres",
+        "DataSource": "postgres://mmuser:mostest@localhost:5432/mmuser?sslmode=disable&connect_timeout=10",
         "DataSourceReplicas": [],
         "MaxIdleConns": 10,
         "MaxOpenConns": 10,
