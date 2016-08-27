@@ -53,6 +53,13 @@ all: dist
 
 dist: | check-style test package
 
+start-database:
+	su postgres -c "psql -c \"CREATE USER mmuser WITH PASSWORD 'mostest' ;\" || true" 
+	su postgres -c 'createdb -O mmuser mmuser || true'
+
+clean-database:
+	su postgres -c 'dropdb mmuser || true; dropuser mmuser || true;'
+
 start-docker:
 	@echo Starting docker containers
 
@@ -153,7 +160,7 @@ check-server-style:
 
 check-style: check-client-style check-server-style
 
-test-server: start-docker prepare-enterprise
+test-server: prepare-enterprise start-database
 	@echo Running server tests
 
 	rm -f cover.out
@@ -203,13 +210,13 @@ ifeq ($(BUILD_ENTERPRISE_READY),true)
 	rm -f config/*.key
 endif
 
-internal-test-web-client: start-docker prepare-enterprise
+internal-test-web-client: start-database prepare-enterprise
 	$(GO) run $(GOFLAGS) *.go -run_web_client_tests
 
-internal-test-javascript-client: start-docker prepare-enterprise
+internal-test-javascript-client: start-database prepare-enterprise
 	$(GO) run $(GOFLAGS) *.go -run_javascript_client_tests
 
-test-client: start-docker prepare-enterprise
+test-client: start-database prepare-enterprise
 	@echo Running client tests
 
 	cd $(BUILD_WEBAPP_DIR) && $(MAKE) test
@@ -312,13 +319,13 @@ endif
 	@#rm -f $(DIST_PATH)/bin/platform
 
 
-run-server: prepare-enterprise start-docker
+run-server: prepare-enterprise start-database
 	@echo Running mattermost for development
 
 	mkdir -p $(BUILD_WEBAPP_DIR)/dist/files
 	$(GO) run $(GOFLAGS) $(GO_LINKER_FLAGS) *.go &
 
-run-cli: prepare-enterprise start-docker
+run-cli: prepare-enterprise start-database
 	@echo Running mattermost for development
 	@echo Example should be like >'make ARGS="-version" run-cli'
 
